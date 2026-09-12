@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MrEzequielOS overrides — estratégia snippets padrão das customs.
+  Troca 3 projetos pelos forks EzequielDevTeam e adiciona os próprios
+  (vendor/extra, device GSI, apps) + device tree treble do Doze-off.
+  Licenças e créditos: ver CREDITS.md na ROM.
+-->
+<manifest>
+
+  <!-- Remove upstream (serão relidos abaixo dos nossos forks) -->
+  <remove-project name="LineageOS/android_packages_apps_Settings" />
+  <remove-project name="LineageOS/android_vendor_lineage" />
+  <remove-project name="LineageOS/android_frameworks_base" />
+
+  <!-- Forks com nosso trabalho (branches com autorias preservadas) -->
+  <project path="packages/apps/Settings" name="EzequielDevTeam/android_packages_apps_Settings"
+           groups="pdk-fs,pdk-cw-tvc,sysui-studio" remote="github"
+           revision="mrezequielos-ui" />
+  <project path="vendor/lineage" name="EzequielDevTeam/android_vendor_lineage"
+           remote="github" revision="mrezequielos-ui" />
+  <project path="frameworks/base" name="EzequielDevTeam/android_frameworks_base"
+           groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="github"
+           revision="mrezequielos-dynbar" />
+
+  <!-- Projetos próprios -->
+  <project path="vendor/extra" name="EzequielDevTeam/android_vendor_extra"
+           remote="github" revision="lineage-23.2" />
+  <project path="device/mrezequiel" name="EzequielDevTeam/android_device_mrezequiel"
+           remote="github" revision="lineage-23.2" />
+  <project path="packages/apps/MrEzequielVideoWallpaper"
+           name="EzequielDevTeam/android_packages_apps_MrEzequielVideoWallpaper"
+           remote="github" revision="lineage-23.2" />
+
+  <!-- Treble GSI (Doze-off, Android 16). APKs/fontes via apps/fetch-apks.sh -->
+  <project path="device/phh/treble" name="Doze-off/device_phh_treble-doze"
+           remote="github" revision="android-16.0" />
+
+</manifest>
