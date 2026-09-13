@@ -9,7 +9,7 @@
 set -e
 
 MANIFEST_URL="https://github.com/EzequielDevTeam/MrEzequielOS.git"
-MANIFEST_BRANCH="lineage-23.2"
+MANIFEST_BRANCH="MrEzequielOS-Q16"
 
 [ -d .repo ] || { echo "ERRO: rode na raiz do codigo (sem .repo aqui)"; exit 1; }
 
