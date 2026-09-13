@@ -15,12 +15,20 @@ MANIFEST_BRANCH="lineage-23.2"
 
 echo "=== 1/5 manifests (snippets MrEzequielOS) ==="
 mkdir -p .repo/local_manifests
+# Limpa manifest legado de tentativa anterior (causava "duplicate path").
+rm -f .repo/local_manifests/doze.xml
 rm -rf /tmp/mreze-manifest
 git clone --depth 1 --branch "$MANIFEST_BRANCH" "$MANIFEST_URL" /tmp/mreze-manifest
 cp /tmp/mreze-manifest/snippets/mrezequiel.xml .repo/local_manifests/
 
 echo "=== 2/5 sync (forks + treble + extra) ==="
 /opt/crave/resync.sh
+
+echo "=== 2b/5 verificando sync ==="
+for d in device/phh/treble/base.mk vendor/extra/product.mk device/mrezequiel/gsi/mrezequiel_gsi.mk; do
+  [ -e "$d" ] || { echo "ERRO: faltando $d apos o sync"; exit 1; }
+done
+echo "arvore completa OK"
 
 echo "=== 3/5 apks oficiais ==="
 bash vendor/extra/apps/fetch-apks.sh
