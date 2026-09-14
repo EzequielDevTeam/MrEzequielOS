@@ -38,6 +38,9 @@ source build/envsetup.sh
 lunch mrezequiel_gsi-bp4a-userdebug
 
 echo "=== 5/5 build systemimage ==="
-m systemimage -j$(nproc)
+# SOONG_ALLOW_MISSING_DEPENDENCIES: pula módulos de nicho do treble sem
+# implementação na árvore (ex.: agold-cmd, CLI de debug p/ daemon MediaTek
+# Transsion). O log mostra o que foi pulado. Revisar antes da release final.
+m systemimage -j$(nproc) SOONG_ALLOW_MISSING_DEPENDENCIES=true
 
 echo "=== OK: out/target/product/tdgsi_arm64_ab/system.img ==="
