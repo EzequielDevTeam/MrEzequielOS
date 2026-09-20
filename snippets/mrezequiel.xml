@@ -35,8 +35,9 @@
   <project path="device/phh/treble" name="Doze-off/device_phh_treble-doze"
            remote="github" revision="android-16.0" />
 
-  <!-- Overlays de hardware exigidos pelo base.mk do treble (phh) -->
-  <project path="vendor/hardware_overlay" name="phhusson/vendor_hardware_overlay"
-           remote="github" revision="master" />
+  <!-- Overlays de hardware (fork sem o QtiAudio: stubs HIDL Java V1_0
+       que não compilam no 16) -->
+  <project path="vendor/hardware_overlay" name="EzequielDevTeam/vendor_hardware_overlay"
+           remote="github" revision="mrezequielos" />
 
 </manifest>
