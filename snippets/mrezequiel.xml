@@ -35,6 +35,11 @@
   <project path="device/phh/treble" name="Doze-off/device_phh_treble-doze"
            remote="github" revision="android-16.0" />
 
+  <!-- HALs OnePlus/OPPO (define vendor.oplus.hardware.biometrics.fingerprint@2.1,
+       exigido pelos shims de digital do treble) -->
+  <project path="hardware/oplus" name="LineageOS/android_hardware_oplus"
+           remote="github" revision="lineage-23.2" />
+
   <!-- Overlays de hardware (fork sem o QtiAudio: stubs HIDL Java V1_0
        que não compilam no 16) -->
   <project path="vendor/hardware_overlay" name="EzequielDevTeam/vendor_hardware_overlay"
