@@ -32,13 +32,10 @@
            remote="github" revision="lineage-23.2" />
 
   <!-- Treble GSI (Doze-off, Android 16). APKs/fontes via apps/fetch-apks.sh -->
-  <project path="device/phh/treble" name="Doze-off/device_phh_treble-doze"
-           remote="github" revision="android-16.0" />
+  <project path="device/phh/treble" name="EzequielDevTeam/device_phh_treble-doze"
+           remote="github" revision="mrezequielos" />
 
-  <!-- HALs OnePlus/OPPO (define vendor.oplus.hardware.biometrics.fingerprint@2.1,
-       exigido pelos shims de digital do treble) -->
-  <project path="hardware/oplus" name="LineageOS/android_hardware_oplus"
-           remote="github" revision="lineage-23.2" />
+
 
   <!-- Overlays de hardware (fork sem o QtiAudio: stubs HIDL Java V1_0
        que não compilam no 16) -->
