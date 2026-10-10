@@ -35,13 +35,13 @@ jobs:
             --iso-publisher "MrEzequielOS" \
             --iso-volume "MrEzequielOS 1.0"
 
-          # pacotes
-          mkdir -p config/package-lists
-          cp ../packages.list config/package-lists/mrezequielos.list.chroot
+          # pacotes (lb config roda como root: tudo com sudo)
+          sudo mkdir -p config/package-lists
+          sudo cp ../packages.list config/package-lists/mrezequielos.list.chroot
 
           # hooks: branding estilo Zorin + leveza
-          mkdir -p config/hooks/live
-          cat > config/hooks/live/0100-branding.hook.chroot <<'EOF'
+          sudo mkdir -p config/hooks/live
+          sudo tee config/hooks/live/0100-branding.hook.chroot > /dev/null <<'EOF'
           #!/bin/sh
           set -e
           echo "MrEzequielOS" > /etc/hostname
@@ -54,12 +54,12 @@ jobs:
           chmod +x /MrEzequielOS-config/apply-theme.sh /MrEzequielOS-config/gnome/*.sh /MrEzequielOS-config/gnome/mrezequielos-appearance 2>/dev/null || true
           /MrEzequielOS-config/apply-theme.sh || echo "AVISO apply-theme falhou, seguindo build"
           EOF
-          chmod +x config/hooks/live/*.hook.chroot
-          mkdir -p config/includes.chroot/MrEzequielOS-config
-          cp -r ../config/* config/includes.chroot/MrEzequielOS-config/
-          mkdir -p config/includes.chroot/usr/share/backgrounds config/includes.chroot/usr/share/pixmaps
-          cp ../config/branding/wallpaper.svg config/includes.chroot/usr/share/backgrounds/mrezequielos-wallpaper.svg || true
-          cp ../config/branding/logo.svg config/includes.chroot/usr/share/pixmaps/mrezequielos-logo.svg || true
+          sudo chmod +x config/hooks/live/*.hook.chroot
+          sudo mkdir -p config/includes.chroot/MrEzequielOS-config
+          sudo cp -r ../config/* config/includes.chroot/MrEzequielOS-config/
+          sudo mkdir -p config/includes.chroot/usr/share/backgrounds config/includes.chroot/usr/share/pixmaps
+          sudo cp ../config/branding/wallpaper.svg config/includes.chroot/usr/share/backgrounds/mrezequielos-wallpaper.svg || true
+          sudo cp ../config/branding/logo.svg config/includes.chroot/usr/share/pixmaps/mrezequielos-logo.svg || true
 
       - name: Build ISO
         run: |
