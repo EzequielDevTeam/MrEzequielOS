@@ -43,8 +43,8 @@ ubiquity
 ubiquity-frontend-gtk
 ubiquity-slideshow-ubuntu
 linux-generic
-grub-efi-amd64
-grub-pc-bin
+shim-signed
+grub-efi-amd64-signed
 squashfs-tools
 xorriso
 epiphany-browser
