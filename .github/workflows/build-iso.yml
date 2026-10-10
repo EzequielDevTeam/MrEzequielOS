@@ -1,0 +1,80 @@
+name: build-iso
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar deps
+        run: |
+          sudo apt update
+          sudo apt install -y live-build debootstrap squashfs-tools xorriso grub-efi-amd64-bin grub-pc-bin isolinux syslinux-efi casper
+
+      - name: Configurar live-build (Noble + GNOME leve)
+        run: |
+          mkdir -p build && cd build
+          sudo lb config \
+            --distribution noble \
+            --archive-areas "main restricted universe multiverse" \
+            --mirror-bootstrap "http://archive.ubuntu.com/ubuntu" \
+            --mirror-chroot "http://archive.ubuntu.com/ubuntu" \
+            --mirror-binary "http://archive.ubuntu.com/ubuntu" \
+            --security true \
+            --updates true \
+            --backports false \
+            --binary-images iso-hybrid \
+            --bootappend-live "boot=casper quiet splash ---" \
+            --bootloaders "grub-efi" \
+            --debian-installer false \
+            --archive-areas "main restricted universe multiverse" \
+            --iso-application "MrEzequielOS" \
+            --iso-preparer "MrEzequielOS" \
+            --iso-publisher "MrEzequielOS" \
+            --iso-volume "MrEzequielOS 1.0" \
+            --image-name "MrEzequielOS-1.0-amd64"
+
+          # pacotes
+          mkdir -p config/package-lists
+          cp ../packages.list config/package-lists/mrezequielos.list.chroot
+
+          # hooks: branding estilo Zorin + leveza
+          mkdir -p config/hooks/live
+          cat > config/hooks/live/0100-branding.hook.chroot <<'EOF'
+          #!/bin/sh
+          set -e
+          echo "MrEzequielOS" > /etc/hostname
+          cat /MrEzequielOS-config/os-release > /etc/os-release 2>/dev/null || true
+          systemctl enable gdm3 || true
+          # leve: remove snapd/telemetria pesada (mantém firefox deb)
+          apt purge -y snapd* apport whoopsie 2>/dev/null || true
+          echo 'ALGO=zstd' >> /etc/default/zramswap 2>/dev/null || true
+          # visual estilo Zorin (temas + extensões + layouts)
+          chmod +x /MrEzequielOS-config/apply-theme.sh /MrEzequielOS-config/gnome/*.sh /MrEzequielOS-config/gnome/mrezequielos-appearance 2>/dev/null || true
+          /MrEzequielOS-config/apply-theme.sh || echo "AVISO apply-theme falhou, seguindo build"
+          EOF
+          chmod +x config/hooks/live/*.hook.chroot
+          mkdir -p config/includes.chroot/MrEzequielOS-config
+          cp -r ../config/* config/includes.chroot/MrEzequielOS-config/
+          mkdir -p config/includes.chroot/usr/share/backgrounds config/includes.chroot/usr/share/pixmaps
+          cp ../config/branding/wallpaper.svg config/includes.chroot/usr/share/backgrounds/mrezequielos-wallpaper.svg || true
+          cp ../config/branding/logo.svg config/includes.chroot/usr/share/pixmaps/mrezequielos-logo.svg || true
+
+      - name: Build ISO
+        run: |
+          cd build
+          sudo lb build
+          ls -lh *.iso
+          mkdir -p ../out
+          cp *.iso ../out/ || true
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: MrEzequielOS-1.0-amd64
+          path: out/*.iso

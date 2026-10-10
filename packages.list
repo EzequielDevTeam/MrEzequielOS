@@ -1,0 +1,69 @@
+# Base leve GNOME - MrEzequielOS estilo Zorin OS
+# ATENÇÃO: dash-to-panel e arc-menu NÃO existem no apt do Ubuntu.
+# Eles são instalados via config/gnome/install-extensions.sh (GitHub + extensions.gnome.org)
+gdm3
+gnome-core
+gnome-shell
+gnome-terminal
+nautilus
+gnome-software
+gnome-tweaks
+gnome-shell-extension-manager
+gnome-shell-extension-prefs
+gnome-shell-extension-user-theme
+gnome-shell-extension-window-list
+gnome-shell-extension-workspace-indicator
+gnome-shell-extension-gsconnect
+network-manager-gnome
+pipewire
+pipewire-pulse
+wireplumber
+
+# Dependências das extensões estilo-Zorin (instaladas via git no hook)
+git
+curl
+unzip
+meson
+ninja-build
+gettext
+nodejs
+
+# Tema / bonito estilo Zorin (cinza-azul escuro + Papirus)
+yaru-theme-gnome-shell
+yaru-theme-icon
+yaru-theme-gtk
+papirus-icon-theme
+gnome-backgrounds
+fonts-ubuntu
+fonts-noto
+fonts-inter
+dconf-editor
+zenity
+
+# Essenciais sistema leve
+casper
+lupin-casper
+ubiquity
+ubiquity-frontend-gtk
+ubiquity-slideshow-ubuntu
+linux-generic
+grub-efi-amd64
+grub-pc-bin
+squashfs-tools
+xorriso
+firefox
+libreoffice-writer
+libreoffice-calc
+libreoffice-impress
+gnome-calculator
+gnome-screenshot
+evince
+eog
+totem
+
+# Performance (leve, como Zorin em PC velho)
+zram-tools
+preload
+thermald
+tlp
+gamemode
