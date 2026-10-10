@@ -64,12 +64,25 @@ jobs:
       - name: Build ISO
         run: |
           cd build
-          sudo lb build
+          sudo lb build > /tmp/lb-build.log 2>&1; LB_RC=$?
+          echo "lb build rc=$LB_RC"
+          echo "===== ULTIMAS 50 LINHAS ====="
+          tail -50 /tmp/lb-build.log
+          echo "===== ERROS ====="
+          grep -iE "^E:|error|failed|Unable|not found|Permission denied" /tmp/lb-build.log | tail -20 || true
+          [ $LB_RC -eq 0 ] || exit $LB_RC
           ls -lh
           mkdir -p ../out
           ISO=$(ls -t live-image-*.hybrid.iso live-image-*.iso *.iso 2>/dev/null | head -1)
           echo "ISO gerada: $ISO"
           cp "$ISO" ../out/MrEzequielOS-1.0-amd64.iso
+
+      - name: Upload log (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lb-build-log
+          path: /tmp/lb-build.log
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
