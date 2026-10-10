@@ -27,6 +27,7 @@ meson
 ninja-build
 gettext
 nodejs
+software-properties-common
 
 # Tema / bonito estilo Zorin (cinza-azul escuro + Papirus)
 yaru-theme-gnome-shell
@@ -35,14 +36,13 @@ yaru-theme-gtk
 papirus-icon-theme
 gnome-backgrounds
 fonts-ubuntu
-fonts-noto
+fonts-noto-core
 fonts-inter
 dconf-editor
 zenity
 
-# Essenciais sistema leve
+# Essenciais sistema leve (live session + instalador)
 casper
-lupin-casper
 ubiquity
 ubiquity-frontend-gtk
 ubiquity-slideshow-ubuntu
@@ -51,7 +51,7 @@ grub-efi-amd64
 grub-pc-bin
 squashfs-tools
 xorriso
-firefox
+epiphany-browser
 libreoffice-writer
 libreoffice-calc
 libreoffice-impress

@@ -6,6 +6,16 @@ echo "[visual] Temas..."
 apt update
 apt install -y yaru-theme-gtk yaru-theme-icon yaru-theme-gnome-shell papirus-icon-theme gnome-tweaks gnome-shell-extension-manager zenity dconf-editor fonts-inter 2>/dev/null || true
 
+echo "[visual] Firefox deb real (via Mozilla Team PPA, sem snap)..."
+( add-apt-repository -y ppa:mozillateam/ppa 2>/dev/null || true
+  cat > /etc/apt/preferences.d/mozilla-firefox <<'EOF'
+Package: *
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001
+EOF
+  apt update || true
+  apt install -y firefox 2>/dev/null || true
+  apt install -y firefox-locale-pt 2>/dev/null || true ) || echo "AVISO Firefox PPA falhou, usando Epiphany"
 echo "[visual] Wallpaper + logo..."
 mkdir -p /usr/share/backgrounds /usr/share/pixmaps /usr/local/bin /usr/share/applications
 cp "$BASE/branding/wallpaper.svg" /usr/share/backgrounds/mrezequielos-wallpaper.svg 2>/dev/null || true

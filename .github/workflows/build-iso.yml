@@ -26,18 +26,14 @@ jobs:
             --mirror-chroot "http://archive.ubuntu.com/ubuntu" \
             --mirror-binary "http://archive.ubuntu.com/ubuntu" \
             --security true \
-            --updates true \
             --backports false \
             --binary-images iso-hybrid \
             --bootappend-live "boot=casper quiet splash ---" \
-            --bootloaders "grub-efi" \
             --debian-installer false \
-            --archive-areas "main restricted universe multiverse" \
             --iso-application "MrEzequielOS" \
             --iso-preparer "MrEzequielOS" \
             --iso-publisher "MrEzequielOS" \
-            --iso-volume "MrEzequielOS 1.0" \
-            --image-name "MrEzequielOS-1.0-amd64"
+            --iso-volume "MrEzequielOS 1.0"
 
           # pacotes
           mkdir -p config/package-lists
@@ -69,9 +65,11 @@ jobs:
         run: |
           cd build
           sudo lb build
-          ls -lh *.iso
+          ls -lh
           mkdir -p ../out
-          cp *.iso ../out/ || true
+          ISO=$(ls -t live-image-*.hybrid.iso live-image-*.iso *.iso 2>/dev/null | head -1)
+          echo "ISO gerada: $ISO"
+          cp "$ISO" ../out/MrEzequielOS-1.0-amd64.iso
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
