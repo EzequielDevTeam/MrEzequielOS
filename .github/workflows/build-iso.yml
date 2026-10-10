@@ -18,6 +18,8 @@ jobs:
 
       - name: Configurar live-build (Noble + GNOME leve)
         run: |
+          lb --version 2>&1 | head -2
+          lb config --help 2>&1 | grep -iE "bootload|syslinux|theme|mode" | head -20
           mkdir -p build && cd build
           sudo lb config \
             --distribution noble \
