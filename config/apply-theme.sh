@@ -5,6 +5,8 @@ BASE="$(dirname "$0")"
 echo "[visual] Temas..."
 apt update
 apt install -y yaru-theme-gtk yaru-theme-icon yaru-theme-gnome-shell papirus-icon-theme gnome-tweaks gnome-shell-extension-manager zenity dconf-editor fonts-inter 2>/dev/null || true
+# Extensões extras do arquivo (podem não existir no 24.04; falha aqui não quebra nada)
+apt install -y gnome-shell-extension-gsconnect gnome-shell-extension-user-theme 2>/dev/null || true
 
 echo "[visual] Firefox deb real (via Mozilla Team PPA, sem snap)..."
 ( add-apt-repository -y ppa:mozillateam/ppa 2>/dev/null || true
