@@ -23,6 +23,7 @@ meson
 ninja-build
 gettext
 nodejs
+librsvg2-bin
 software-properties-common
 
 # Tema / bonito estilo Zorin (cinza-azul escuro + Papirus)

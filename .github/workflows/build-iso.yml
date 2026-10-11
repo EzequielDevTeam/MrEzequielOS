@@ -18,10 +18,9 @@ jobs:
 
       - name: Configurar live-build (Noble + GNOME leve)
         run: |
-          lb --version 2>&1 | head -2
-          lb config --help 2>&1 | grep -iE "bootload|syslinux|theme|mode" | head -20
           mkdir -p build && cd build
           sudo lb config \
+            --mode ubuntu \
             --distribution noble \
             --archive-areas "main restricted universe multiverse" \
             --mirror-bootstrap "http://archive.ubuntu.com/ubuntu" \
@@ -31,6 +30,7 @@ jobs:
             --backports false \
             --binary-images iso-hybrid \
             --bootappend-live "boot=casper quiet splash ---" \
+            --syslinux-theme live-build \
             --debian-installer false \
             --iso-application "MrEzequielOS" \
             --iso-preparer "MrEzequielOS" \
