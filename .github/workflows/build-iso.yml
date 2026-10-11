@@ -41,6 +41,7 @@ jobs:
 
       - name: Instalar sistema no chroot
         run: |
+          set -o pipefail
           sudo cp packages.list chroot/tmp/
           sudo mkdir -p chroot/tmp/mre-config
           sudo cp -r config/* chroot/tmp/mre-config/
@@ -48,27 +49,33 @@ jobs:
           #!/bin/bash
           set -e
           export DEBIAN_FRONTEND=noninteractive PATH=/usr/sbin:/usr/bin:/sbin:/bin
+          echo "=== [1/7] apt update ==="
           apt update
+          echo "=== [2/7] kernel ==="
           apt install -y linux-generic
-          xargs -a /tmp/packages.list apt install -y
+          echo "=== [3/7] pacotes ==="
+          grep -vE '^[[:space:]]*(#|$)' /tmp/packages.list | tr '\n' ' ' > /tmp/pkgs.txt
+          wc -w /tmp/pkgs.txt
+          apt install -y $(cat /tmp/pkgs.txt)
+          echo "=== [4/7] tema MrEzequielOS ==="
           /tmp/mre-config/apply-theme.sh
+          echo "=== [5/7] initramfs ==="
           update-initramfs -u -k all
+          echo "=== [6/7] branding ==="
           echo "MrEzequielOS" > /etc/hostname
           cp /tmp/mre-config/branding/os-release /etc/os-release
+          echo "=== [7/7] limpeza ==="
           apt purge -y snapd* apport whoopsie || true
           if ! dpkg -s gnome-software >/dev/null 2>&1; then apt install -y --no-install-recommends gnome-software; fi
           apt autoremove -y || true
           apt clean
           rm -rf /tmp/* /var/tmp/* /var/log/* /var/cache/debconf/*-old /root/.cache
           rm -f /etc/resolv.conf /etc/machine-id /var/lib/dbus/machine-id
+          echo "=== CHROOT OK ==="
           EOF
           sudo chmod +x chroot/tmp/build-inside.sh
-          sudo chroot chroot /tmp/build-inside.sh > /tmp/mre-chroot.log 2>&1; RC=$?
+          sudo chroot chroot /tmp/build-inside.sh 2>&1 | tee /tmp/mre-chroot.log; RC=${PIPESTATUS[0]}
           echo "chroot rc=$RC"
-          echo "===== TAIL ====="
-          tail -30 /tmp/mre-chroot.log
-          echo "===== ERROS ====="
-          grep -a -iE "^E:|Unable to|has no installation candidate|unmet dependencies|not installable" /tmp/mre-chroot.log | tail -10 || true
           cp /tmp/mre-chroot.log ./mre-chroot.log
           [ $RC -eq 0 ] || exit $RC
 
