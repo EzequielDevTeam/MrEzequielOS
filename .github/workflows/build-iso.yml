@@ -11,83 +11,126 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Instalar deps
+      - name: Instalar deps do host
         run: |
           sudo apt update
-          sudo apt install -y live-build debootstrap squashfs-tools xorriso grub-efi-amd64-bin grub-pc-bin isolinux syslinux-efi casper dosfstools mtools
+          sudo apt install -y debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin mtools dosfstools
 
-      - name: Configurar live-build (Noble + GNOME leve)
+      - name: Bootstrap Noble (debootstrap)
         run: |
-          mkdir -p build && cd build
-          sudo lb config \
-            --mode ubuntu \
-            --distribution noble \
-            --archive-areas "main restricted universe multiverse" \
-            --mirror-bootstrap "http://archive.ubuntu.com/ubuntu" \
-            --mirror-chroot "http://archive.ubuntu.com/ubuntu" \
-            --mirror-binary "http://archive.ubuntu.com/ubuntu" \
-            --security true \
-            --backports false \
-            --binary-images iso-hybrid \
-            --bootappend-live "boot=casper quiet splash ---" \
-            --syslinux-theme live-build \
-            --debian-installer false \
-            --iso-application "MrEzequielOS" \
-            --iso-preparer "MrEzequielOS" \
-            --iso-publisher "MrEzequielOS" \
-            --iso-volume "MrEzequielOS 1.0"
+          sudo debootstrap --arch=amd64 noble chroot http://archive.ubuntu.com/ubuntu
+          sudo mount -t proc /proc chroot/proc
+          sudo mount --rbind /sys chroot/sys
+          sudo mount --rbind /dev chroot/dev
+          sudo mkdir -p chroot/usr/share/keyrings
+          sudo cp /usr/share/keyrings/ubuntu-archive-keyring.gpg chroot/usr/share/keyrings/
+          sudo tee chroot/etc/apt/sources.list.d/ubuntu.sources > /dev/null <<'EOF'
+          Types: deb
+          URIs: http://archive.ubuntu.com/ubuntu
+          Suites: noble noble-updates noble-backports
+          Components: main restricted universe multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 
-          # pacotes (lb config roda como root: tudo com sudo)
-          sudo mkdir -p config/package-lists
-          sudo cp ../packages.list config/package-lists/mrezequielos.list.chroot
-
-          # hooks: branding estilo Zorin + leveza
-          sudo mkdir -p config/hooks/live
-          sudo tee config/hooks/live/0100-branding.hook.chroot > /dev/null <<'EOF'
-          #!/bin/sh
-          set -e
-          echo "MrEzequielOS" > /etc/hostname
-          cat /MrEzequielOS-config/os-release > /etc/os-release 2>/dev/null || true
-          systemctl enable gdm3 || true
-          # leve: remove snapd/telemetria pesada (mantém firefox deb)
-          apt purge -y snapd* apport whoopsie 2>/dev/null || true
-          echo 'ALGO=zstd' >> /etc/default/zramswap 2>/dev/null || true
-          # visual estilo Zorin (temas + extensões + layouts)
-          chmod +x /MrEzequielOS-config/apply-theme.sh /MrEzequielOS-config/gnome/*.sh /MrEzequielOS-config/gnome/mrezequielos-appearance 2>/dev/null || true
-          /MrEzequielOS-config/apply-theme.sh || echo "AVISO apply-theme falhou, seguindo build"
+          Types: deb
+          URIs: http://security.ubuntu.com/ubuntu
+          Suites: noble-security
+          Components: main restricted universe multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
           EOF
-          sudo chmod +x config/hooks/live/*.hook.chroot
-          sudo mkdir -p config/includes.chroot/MrEzequielOS-config
-          sudo cp -r ../config/* config/includes.chroot/MrEzequielOS-config/
-          sudo mkdir -p config/includes.chroot/usr/share/backgrounds config/includes.chroot/usr/share/pixmaps
-          sudo cp ../config/branding/wallpaper.svg config/includes.chroot/usr/share/backgrounds/mrezequielos-wallpaper.svg || true
-          sudo cp ../config/branding/logo.svg config/includes.chroot/usr/share/pixmaps/mrezequielos-logo.svg || true
+          echo "nameserver 8.8.8.8" | sudo tee chroot/etc/resolv.conf > /dev/null
 
-      - name: Build ISO
+      - name: Instalar sistema no chroot
         run: |
-          cd build
-          sudo lb build > /tmp/lb-build.log 2>&1; LB_RC=$?
-          echo "lb build rc=$LB_RC"
-          echo "===== ULTIMAS 50 LINHAS ====="
-          tail -50 /tmp/lb-build.log
+          sudo cp packages.list chroot/tmp/
+          sudo mkdir -p chroot/tmp/mre-config
+          sudo cp -r config/* chroot/tmp/mre-config/
+          sudo tee chroot/tmp/build-inside.sh > /dev/null <<'EOF'
+          #!/bin/bash
+          set -e
+          export DEBIAN_FRONTEND=noninteractive PATH=/usr/sbin:/usr/bin:/sbin:/bin
+          apt update
+          apt install -y linux-generic
+          xargs -a /tmp/packages.list apt install -y
+          /tmp/mre-config/apply-theme.sh
+          update-initramfs -u -k all
+          echo "MrEzequielOS" > /etc/hostname
+          cp /tmp/mre-config/branding/os-release /etc/os-release
+          apt purge -y snapd* apport whoopsie || true
+          if ! dpkg -s gnome-software >/dev/null 2>&1; then apt install -y --no-install-recommends gnome-software; fi
+          apt autoremove -y || true
+          apt clean
+          rm -rf /tmp/* /var/tmp/* /var/log/* /var/cache/debconf/*-old /root/.cache
+          rm -f /etc/resolv.conf /etc/machine-id /var/lib/dbus/machine-id
+          EOF
+          sudo chmod +x chroot/tmp/build-inside.sh
+          sudo chroot chroot /tmp/build-inside.sh > /tmp/mre-chroot.log 2>&1; RC=$?
+          echo "chroot rc=$RC"
+          echo "===== TAIL ====="
+          tail -30 /tmp/mre-chroot.log
           echo "===== ERROS ====="
-          grep -iE "^E:|error|failed|Unable|not found|Permission denied" /tmp/lb-build.log | tail -20 || true
-          [ $LB_RC -eq 0 ] || exit $LB_RC
-          ls -lh
-          mkdir -p ../out
-          ISO=$(ls -t live-image-*.hybrid.iso live-image-*.iso *.iso 2>/dev/null | head -1)
-          echo "ISO gerada: $ISO"
-          cp "$ISO" ../out/MrEzequielOS-1.0-amd64.iso
+          grep -a -iE "^E:|Unable to|has no installation candidate|unmet dependencies|not installable" /tmp/mre-chroot.log | tail -10 || true
+          cp /tmp/mre-chroot.log ./mre-chroot.log
+          [ $RC -eq 0 ] || exit $RC
 
-      - name: Upload log (se falhar)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lb-build-log
-          path: /tmp/lb-build.log
+      - name: Desmontar chroot
+        if: always()
+        run: |
+          sudo umount -R chroot/dev 2>/dev/null || sudo umount -lf chroot/dev 2>/dev/null || true
+          sudo umount -R chroot/sys 2>/dev/null || sudo umount -lf chroot/sys 2>/dev/null || true
+          sudo umount chroot/proc 2>/dev/null || sudo umount -lf chroot/proc 2>/dev/null || true
+          mount | grep chroot || echo "tudo desmontado"
+
+      - name: Gerar squashfs + ISO
+        run: |
+          set -e
+          mkdir -p iso/casper iso/boot/grub iso/EFI/BOOT iso/.disk iso/install out
+          echo "=== manifest ==="
+          sudo chroot chroot dpkg-query -W --showformat='${Package} ${Version}\n' | sudo tee iso/casper/filesystem.manifest > /dev/null
+          sudo du -sx --block-size=1 chroot | cut -f1 | sudo tee iso/casper/filesystem.size > /dev/null
+          KV=$(basename $(ls chroot/boot/vmlinuz-* | head -1) | sed 's/vmlinuz-//')
+          echo "Kernel: $KV"
+          sudo cp chroot/boot/vmlinuz-$KV iso/casper/vmlinuz
+          sudo cp chroot/boot/initrd.img-$KV iso/casper/initrd
+          sudo tee iso/boot/grub/grub.cfg > /dev/null <<'EOF'
+          insmod part_gpt
+          insmod part_msdos
+          insmod iso9660
+          insmod ext2
+          set timeout=15
+          set default=0
+          menuentry "Experimentar o MrEzequielOS" {
+              linux /casper/vmlinuz boot=casper quiet splash ---
+              initrd /casper/initrd
+          }
+          menuentry "Instalar o MrEzequielOS" {
+              linux /casper/vmlinuz boot=casper only-ubiquity quiet splash ---
+              initrd /casper/initrd
+          }
+          EOF
+          sudo tee iso/boot/grub/loopback.cfg > /dev/null <<'EOF'
+          menuentry "MrEzequielOS Live" {
+              set isofile="/boot/iso/MrEzequielOS-1.0-amd64.iso"
+              loopback loop $isofile
+              linux (loop)/casper/vmlinuz boot=casper iso-scan/filename=$isofile quiet splash ---
+              initrd (loop)/casper/initrd
+          }
+          EOF
+          echo 'MrEzequielOS 1.0 LTS "Noble" - Release amd64' | sudo tee iso/.disk/info > /dev/null
+          echo "=== squashfs (zstd) ==="
+          sudo mksquashfs chroot iso/casper/filesystem.squashfs -comp zstd -b 1M -noappend
+          echo "=== ISO (BIOS+UEFI) ==="
+          sudo grub-mkrescue --output=out/MrEzequielOS-1.0-amd64.iso iso/ -- -volid "MrEzequielOS 1.0"
+          ls -lh out/
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: MrEzequielOS-1.0-amd64
           path: out/*.iso
+
+      - name: Upload log (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mre-chroot-log
+          path: mre-chroot.log

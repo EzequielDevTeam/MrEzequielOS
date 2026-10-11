@@ -1,32 +1,44 @@
-# Base leve GNOME - MrEzequielOS estilo Zorin OS
+# Base leve GNOME - MrEzequielOS estilo Zorin OS (Ubuntu 24.04 Noble)
 # ATENÇÃO: dash-to-panel e arc-menu NÃO existem no apt do Ubuntu.
-# Eles são instalados via config/gnome/install-extensions.sh (GitHub + extensions.gnome.org)
+# Eles são instalados via config/gnome/install-extensions.sh (GitHub)
 gdm3
+gnome-session
 gnome-core
 gnome-shell
 gnome-terminal
+gnome-text-editor
 nautilus
+file-roller
 gnome-software
 gnome-tweaks
 gnome-shell-extension-manager
 gnome-shell-extension-prefs
+gnome-disk-utility
+seahorse
 network-manager-gnome
+xserver-xorg
+xwayland
 pipewire
+pipewire-alsa
 pipewire-pulse
 wireplumber
 
-# Dependências das extensões estilo-Zorin (instaladas via git no hook)
+# Build das extensões estilo-Zorin (git + meson)
 git
 curl
 unzip
+zip
+make
 meson
 ninja-build
 gettext
+sassc
 nodejs
-librsvg2-bin
+libglib2.0-bin
 software-properties-common
+librsvg2-bin
 
-# Tema / bonito estilo Zorin (cinza-azul escuro + Papirus)
+# Tema / bonito estilo Zorin (escuro + Papirus)
 yaru-theme-gnome-shell
 yaru-theme-icon
 yaru-theme-gtk
@@ -38,16 +50,40 @@ fonts-inter
 dconf-editor
 zenity
 
-# Essenciais sistema leve (live session + instalador)
+# Live + instalador + kernel + firmware
 casper
 ubiquity
 ubiquity-frontend-gtk
 ubiquity-slideshow-ubuntu
+ubiquity-casper
 linux-generic
+linux-firmware
+intel-microcode
+amd64-microcode
 shim-signed
 grub-efi-amd64-signed
-squashfs-tools
-xorriso
+sudo
+netplan.io
+cryptsetup
+lvm2
+
+# Drivers / firmware / energia
+ubuntu-drivers-common
+software-properties-gtk
+fwupd
+power-profiles-daemon
+thermald
+tlp
+zram-tools
+preload
+gamemode
+
+# Impressão
+cups
+cups-browsed
+system-config-printer
+
+# Apps
 epiphany-browser
 libreoffice-writer
 libreoffice-calc
@@ -57,10 +93,3 @@ gnome-screenshot
 evince
 eog
 totem
-
-# Performance (leve, como Zorin em PC velho)
-zram-tools
-preload
-thermald
-tlp
-gamemode

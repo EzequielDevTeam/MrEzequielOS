@@ -1,9 +1,9 @@
 # MrEzequielOS 🐧
-Baseado no Ubuntu 24.04 LTS (Noble) + GNOME Minimal (leve e bonito).
+Baseado no Ubuntu 24.04 LTS (Noble) + GNOME Minimal estilo Zorin OS (leve e bonito).
 
 ## O que é?
-MrEzequielOS = Ubuntu minimal + `gnome-core` + `gdm3` + tema custom + apps essenciais.
-GNOME completo pesa ~2.5GB de ISO. Essa versão mira ~1.3-1.6GB.
+MrEzequielOS = Ubuntu minimal (debootstrap) + `gnome-core` + `gdm3` + taskbar Windows (Dash to Panel) + menu iniciar (ArcMenu) + tema escuro + apps essenciais.
+ISO com boot BIOS + UEFI (Secure Boot desligado no v1).
 
 > "geome" que você falou é o **GNOME**. É bonito mas pesado, então vamos usar o **gnome-core** (versão leve).
 
