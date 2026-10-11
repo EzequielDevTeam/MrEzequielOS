@@ -73,7 +73,6 @@ software-properties-gtk
 fwupd
 power-profiles-daemon
 thermald
-tlp
 zram-tools
 preload
 gamemode
